@@ -1,3 +1,3 @@
 import "./router.mjs"
-import "./create-caching-file-loader.mjs"
+import "./loader.mjs"
 import "./render.mjs"

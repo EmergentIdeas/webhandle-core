@@ -87,5 +87,36 @@ res.addFilter(html => {
 
 This works regardless of what templating engine is used.
 
+### Loaders
+
+Webhandle relies on 'loaders'. A loader has the signature:
+
+```js
+function(name, callback) 
+```
+where the callback has the signature:
+```js
+function(data) 
+```
+
+`data` could be any type, depending on what the loaders are loading. `name` must be a string. If the
+loader can not find information for the `name`, the callback is called with `undefined`. The callback
+MUST be called.
+
+Loaders exist for things like cached information or templates, situations in which the information
+may come from multiple places, but the caller has no real way to handle errors, nor do they really care,
+except to handle gracefully whatever it means not to have a resource available. If it was a file resource,
+that may indicate a 404 response. If it's a missing template, maybe an error in the log and a continuation
+to the next part of the template.
+
+There are some included loaders in the `lib/loaders` directory getting the members from objects and the file
+system. Additionally, there are loaders provide caching functionality and combining multiple loaders into a
+single loader. There is also a loader createor which takes a normal callback loader and creates one
+which will accept a callback and return a promise which resolves to the `data` value passed to the callback.
+
+Loaders are callback based, instead of async/promise based, by default because there can be a huge performance
+difference in these strategies. In the case where all requested resources are cached already, the callbacks
+can finish in the same tick. Since loaders may be called hundreds or thousands of times per request, the
+extra ticks add up.
 
 
