@@ -1,11 +1,11 @@
 import filog from 'filter-log'
-import commingle from 'commingle'
 import FileSink from 'file-sink'
 import createRouter from './lib/router.mjs'
 import EventEmitter from 'events'
 import createLongExpirationMiddleware from './lib/create-long-expiration-middleware.mjs'
 import createResponseFilters from './lib/create-response-filters.mjs'
-import PausingTransform from 'pausing-transform'
+import acceptLanguageMiddleware from './lib/accept-language-middleware.mjs'
+import path from "node:path"
 
 /**
  * Webhandle root object.
@@ -138,6 +138,9 @@ export default class Webhandle {
 			
 			// sets up the ability to add post processing to response rendering
 			this.routers.preParmParse.use(createResponseFilters(this))
+
+			// parse the Accept-Languages header to determine what languages the user desires
+			this.routers.preStatic.use(acceptLanguageMiddleware)
 			
 			this.initialized = true
 		}
@@ -156,23 +159,21 @@ export default class Webhandle {
 		
 	}
 
+	getAbsolutePathFromProjectRelative = function(projectRelative) {
+		if(projectRelative.startsWith('/')) {
+			return projectRelative
+		}
+		let resolvedRoot = path.resolve(webhandle.projectRoot)
+		let absPath = path.join(resolvedRoot, projectRelative)
+		return absPath
+	}
+
 	async handleRequest(req = {}, res = {}, next) {
-		// if(!req) {
-		// 	req = {
-		// 		locals: {}
-		// 	}
-		// }
-		// if(!res) {
-		// 	res = new PausingTransform()
-		// }
-		// console.time('request processing')
 		return this.compositeRouter(req, res, next)
 	}
 
 	createCompositeRouter() {
 		let composite = this.createAppRouter()
-
-
 
 		// Set up routes where we're doing redirects or rewrites of the url before we
 		// really start processing the request

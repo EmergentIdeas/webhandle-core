@@ -16,7 +16,7 @@ Express routing is infinitely flexible. Most projects have an understandable, mo
 constrained request lifecyle though. Webhandle plans that flexibility by adding a 
 router for each point in the request lifecycle.
 
-The routers themselves are available from `webhandle).routers`. 
+The routers themselves are available from `webhandle.routers`. 
 The child routers, in the order they are called are:
 
 * preParmParse: a chance to process the request before the body parser, url parser, cookie parser, etc.
@@ -120,3 +120,9 @@ can finish in the same tick. Since loaders may be called hundreds or thousands o
 extra ticks add up.
 
 
+
+### Languages
+
+The Accept-Languages header is parsed to determine the set of requested languages. On the request, the member
+`requestedLanguages` is set, which is an array of lower case strings for the requested languages in preference
+order. It may be empty but will not be null. 
