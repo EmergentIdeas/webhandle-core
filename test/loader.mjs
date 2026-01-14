@@ -12,7 +12,7 @@ import createCompositeLoader from '../lib/loaders/create-composite-loader.mjs';
 let testdir = 'test' + (new Date().getTime())
 let testpath = '/tmp/' + testdir
 let fsTmp = new FileSink('/tmp')
-fsTmp.mkdir(testdir)
+await fsTmp.mkdir(testdir)
 
 let fsTest = new FileSink(testpath)
 let templateLoader = createTripartiteTemplateLoader(fsTest)
