@@ -163,7 +163,7 @@ export default class Webhandle {
 		if(projectRelative.startsWith('/')) {
 			return projectRelative
 		}
-		let resolvedRoot = path.resolve(webhandle.projectRoot)
+		let resolvedRoot = path.resolve(this.projectRoot)
 		let absPath = path.join(resolvedRoot, projectRelative)
 		return absPath
 	}
