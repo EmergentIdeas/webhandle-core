@@ -126,3 +126,15 @@ extra ticks add up.
 The Accept-Languages header is parsed to determine the set of requested languages. On the request, the member
 `requestedLanguages` is set, which is an array of lower case strings for the requested languages in preference
 order. It may be empty but will not be null. 
+
+
+### Remember Passing Router
+
+Wraps a router with a router that remembers if the wrapped router chooses
+too call next instead of fulfilling the request. On subsequent requests of
+the same path this router will just call next() instead of invoking the
+underlying router.
+
+This can be useful for routers which somewhat expensive to run but which
+contain a fixed set of content, as would be the case if you were serving
+files from a library. 

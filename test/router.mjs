@@ -80,6 +80,7 @@ test("webhandle router tests", async (t) => {
 			let primaryCalled = false
 			// prevent errors caused by incomplete request and response ojects
 			webhandle.routers.preParmParse.subRouters = []
+			// webhandle.routers.preStatic.subRouters = []
 
 			webhandle.routers.primary.use((req, res, next) => {
 				primaryCalled = true
