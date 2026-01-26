@@ -131,7 +131,7 @@ order. It may be empty but will not be null.
 ### Remember Passing Router
 
 Wraps a router with a router that remembers if the wrapped router chooses
-too call next instead of fulfilling the request. On subsequent requests of
+to call next instead of fulfilling the request. On subsequent requests of
 the same path this router will just call next() instead of invoking the
 underlying router.
 

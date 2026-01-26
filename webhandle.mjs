@@ -159,7 +159,7 @@ export default class Webhandle {
 		
 	}
 
-	getAbsolutePathFromProjectRelative = function(projectRelative) {
+	getAbsolutePathFromProjectRelative(projectRelative) {
 		if(projectRelative.startsWith('/')) {
 			return projectRelative
 		}

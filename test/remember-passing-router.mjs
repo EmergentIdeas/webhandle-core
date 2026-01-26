@@ -1,7 +1,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert';
-import createRememberPassingRouter from '../lib/remember-passing-router.mjs';
+import createRememberPassingRouter from '../lib/create-remember-passing-router.mjs';
 
 test("remember-passing-router", async (t) => {
 	await t.test('passing router', async (t) => {
