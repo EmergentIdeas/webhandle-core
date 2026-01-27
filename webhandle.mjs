@@ -69,6 +69,9 @@ export default class Webhandle {
 		/* the absolute path of the project */
 		this.setIfBlank('projectRoot', '.')
 
+		/* an id to identify this instance */
+		this.setIfBlank('id', '' + (new Date().getTime()))
+
 		/* a counter let you know when caches should be invalidated */
 		this.setIfBlank('resourceVersion', new Date().getTime())
 
@@ -104,30 +107,46 @@ export default class Webhandle {
 			this.sinks.project = new FileSink(this.projectRoot)
 		}
 
+		if(!this.config.development) {
+			this.config.development = false
+		}
+		this.development = this.config.development
+
 	}
 	
 	/**
 	 * Add all the middleware and load the config data (if any)
 	 * @param {object} options 
 	 */
-	async init(options) {
+	async init(options = {}) {
 		if(!this.initialized) {
 
-			if(process.env.webhandleConfigFile) {
+			if(process.env.webhandleConfigFile || this.webhandleConfigFile || this.config.webhandleConfigFile || options.webhandleConfigFile) {
+				let fileName =  options.webhandleConfigFile || this.webhandleConfigFile || this.config.webhandleConfigFile || process.env.webhandleConfigFile
 				try {
 
-					let data = await this.sinks.project.read(process.env.webhandleConfigFile)
+					let data = await this.sinks.project.read(fileName)
 					if(data) {
 						this.config = Object.assign(this.config, JSON.parse(data))
 					}
 				}
 				catch(e) {
 					this.log.error({
-						msg: `Could not load config file ${process.env.webhandleConfigFile}`
+						msg: `Could not load config file ${fileName}`
 						, error: e
 					})
 				}
 			}
+
+			
+			if(!this.config.development) {
+				this.config.development = false
+			}
+			if(process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase() === 'development') {
+				this.config.development = true
+			}
+			
+			this.development = this.config.development
 
 			if (!this.compositeRouter) {
 				this.compositeRouter = this.createCompositeRouter()

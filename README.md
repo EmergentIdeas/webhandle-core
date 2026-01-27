@@ -6,7 +6,7 @@ import listenOnHttpServer from "@webhandle/core/lib/listen-on-http-server.mjs";
 
 let webhandle = new Webhandle()
 await webhandle.init()
-await listenOnHttpServer(webhandle)
+listenOnHttpServer(webhandle)
 ```
 
 ## Features
@@ -49,12 +49,24 @@ res.locals.vrsc = '/vrsc/' + webhandle.resourceVersion
 ```
 is run to set the prefix as part of the response locals. However, if 
 ```js
-process.env.NODE_ENV != 'development'
+process.env.NODE_ENV == 'development' || webhandle.config.development == true
 ```
 then `res.locals.vrsc` is set to the empty string.
 
 To force clients to get updated files, the instances `resourceVersion` number can be changed or the
 app can be reloaded.
+
+### Development Flag
+
+If `process.env.NODE_ENV == 'development' || webhandle.config.development == true`, then 
+`webhandle.development` is set to true. (otherwise false)
+
+It will also set response locals like:
+
+```js
+res.locals.developmentMode = webhandle.development ? true : false
+```
+
 
 ### Response Rendering Postprocessing Filters
 
