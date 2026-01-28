@@ -29,6 +29,7 @@ export default class Webhandle {
 	staticServers;
 	sinks;
 	services;
+	componentManagers;
 	routers;
 	projectRoot;
 	resourceVersion;
@@ -42,41 +43,44 @@ export default class Webhandle {
 	constructor(options) {
 		Object.assign(this, options)
 
-		this.setIfBlank('app', null)
+		this.setIfUnset('app', null)
 		
-		this.setIfBlank('config', {})
+		this.setIfUnset('config', {})
 
-		this.setIfBlank('views', [])
+		this.setIfUnset('views', [])
 
 		/* functions which load templates */
-		this.setIfBlank('templateLoaders', [])
+		this.setIfUnset('templateLoaders', [])
 
 		/* a list of directories which contain static files to server */
-		this.setIfBlank('staticPaths', [])
+		this.setIfUnset('staticPaths', [])
 
 		/* the servers of files */
-		this.setIfBlank('staticServers', [])
+		this.setIfUnset('staticServers', [])
 
 		/* FileSink objects which allow access to static resources */
-		this.setIfBlank('sinks', {})
+		this.setIfUnset('sinks', {})
 
 		/* services created to access and process data */
-		this.setIfBlank('services', {})
+		this.setIfUnset('services', {})
+
+		/* modules by name which have added functionality */
+		this.setIfUnset('componentManagers', {})
 
 		/* handlers for user requests */
-		this.setIfBlank('routers', this.createRouters())
+		this.setIfUnset('routers', this.createRouters())
 
 		/* the absolute path of the project */
-		this.setIfBlank('projectRoot', '.')
+		this.setIfUnset('projectRoot', '.')
 
 		/* an id to identify this instance */
-		this.setIfBlank('id', '' + (new Date().getTime()))
+		this.setIfUnset('id', '' + (new Date().getTime()))
 
 		/* a counter let you know when caches should be invalidated */
-		this.setIfBlank('resourceVersion', new Date().getTime())
+		this.setIfUnset('resourceVersion', new Date().getTime())
 
 		/* event emitters for communications between decoupled components */
-		this.setIfBlank('events', {
+		this.setIfUnset('events', {
 			global: new EventEmitter()
 		})
 
@@ -84,18 +88,18 @@ export default class Webhandle {
 		 * is ready. This would be things like database connection and setup, acquiring 
 		 * licenses, registering existance, ect.
 		 */
-		this.setIfBlank('deferredInitializers', [])
+		this.setIfUnset('deferredInitializers', [])
 
 
 
 		// send all messages at info or above to std out (unless otherwise defined in the options)
-		this.setIfBlank('defaultLogLevel', filog.levels.INFO)
-		this.setIfBlank('defaultLogFilter',
+		this.setIfUnset('defaultLogLevel', filog.levels.INFO)
+		this.setIfUnset('defaultLogFilter',
 			(entry) => {
 				return entry.level && entry.level >= this.defaultLogLevel
 			}
 		)
-		this.setIfBlank('defaultLogStream', process.stdout)
+		this.setIfUnset('defaultLogStream', process.stdout)
 
 		filog.defineProcessor('standard', {}, this.defaultLogStream, (entry) => {
 			return this.defaultLogFilter(entry)
@@ -163,6 +167,34 @@ export default class Webhandle {
 			
 			this.initialized = true
 		}
+	}
+
+	/**
+	 * Serves static files from the path specified.
+	 * @param {string} path 
+	 * @param {object} [options] Options
+	 * @param {string} [options.urlPrefix] Even though the folder structure at that location 
+	 * doesn't have the prefix folders, any request for those resources must.
+	 * @param {string} [options.fixedSetOfFiles] If true, it will be assumed that the resources are at a
+	 * fixed, known set of URLs. That is, if a url can't be found the first time it's searched for
+	 * it would be found subsequent times either. This let's us optimize server files from libraries
+	 * or otherwise unchanging sets. This is assumed true if `development` is not true.
+	 */
+	addStaticDir(path,  {urlPrefix, fixedSetOfFiles} = {}) {
+		if(fixedSetOfFiles === undefined || fixedSetOfFiles === null) {
+			// If we're not in development mode and we're not told, then
+			// assume this is some dependency with a fixed set of files.
+			fixedSetOfFiles = this.development
+		}
+		
+		
+		path = this.getAbsolutePathFromProjectRelative(path)
+
+		let info = {urlPrefix, fixedSetOfFiles, path}
+		this.staticDirs.push(info)
+		
+		return info
+
 	}
 	
 	/**
@@ -314,7 +346,7 @@ export default class Webhandle {
 		return routers
 	}
 
-	setIfBlank(attr, value) {
+	setIfUnset(attr, value) {
 		if (!this[attr]) {
 			this[attr] = value
 		}
