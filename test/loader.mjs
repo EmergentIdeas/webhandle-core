@@ -7,6 +7,8 @@ import createCachingLoader from '../lib/loaders/create-caching-loader.mjs'
 import createMemberLoader from '../lib/loaders/create-member-loader.mjs';
 import createPromisedLoader from '../lib/loaders/create-promised-loader.mjs';
 import createCompositeLoader from '../lib/loaders/create-composite-loader.mjs';
+import createPrefixRemovingLoader from '../lib/loaders/create-prefix-removing-loader.mjs';
+import createRememberPassingLoader from '../lib/loaders/create-remember-passing-loader.mjs';
 
 
 let testdir = 'test' + (new Date().getTime())
@@ -19,8 +21,25 @@ let templateLoader = createTripartiteTemplateLoader(fsTest)
 let fileLoader = createFileSinkLoader(fsTest)
 let dataSource = {}
 let memberLoader = createMemberLoader(dataSource)
+let prefixLoader = createPrefixRemovingLoader(templateLoader, '/a/b/')
+let rememberPassingLoader = createRememberPassingLoader(templateLoader)
 
 test("test file loader", async (t) => {
+	await t.test('remember passing loader', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			rememberPassingLoader('one', (data) => {
+				try {
+					assert(data === undefined, 'No data should have been found.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+
 	await t.test('setup', async (t) => {
 		await fsTest.write('one.tri', 'abc')
 		await fsTest.write('one.html', 'def')
@@ -28,9 +47,192 @@ test("test file loader", async (t) => {
 		await fsTest.mkdir('two')
 		await fsTest.write('two/three.tri', 'ghi')
 	})
+	await t.test('prefix removing loader, no value', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			prefixLoader('one', (data) => {
+				try {
+					assert(data === undefined, 'No data should have been found.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+	
+	await t.test('prefix removing loader', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			prefixLoader('/a/b/one', (data) => {
+				try {
+					assert.equal(data, 'abc', 'Template content did not match.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+	await t.test('prefix removing loader without slash', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			prefixLoader('a/b/one', (data) => {
+				try {
+					assert.equal(data, 'abc', 'Template content did not match.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+	
+	
+	prefixLoader = createPrefixRemovingLoader(templateLoader, '/a/b')
+	await t.test('prefix removing loader', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			prefixLoader('/a/b/one', (data) => {
+				try {
+					assert.equal(data, 'abc', 'Template content did not match.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+	await t.test('prefix removing loader without slash', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			prefixLoader('a/b/one', (data) => {
+				try {
+					assert.equal(data, 'abc', 'Template content did not match.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+
+	prefixLoader = createPrefixRemovingLoader(templateLoader, 'a/b')
+	await t.test('prefix removing loader', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			prefixLoader('/a/b/one', (data) => {
+				try {
+					assert.equal(data, 'abc', 'Template content did not match.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+	await t.test('prefix removing loader without slash', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			prefixLoader('a/b/one', (data) => {
+				try {
+					assert.equal(data, 'abc', 'Template content did not match.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+	
+	
+	prefixLoader = createPrefixRemovingLoader(templateLoader, 'a/b/')
+	await t.test('prefix removing loader', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			prefixLoader('/a/b/one', (data) => {
+				try {
+					assert.equal(data, 'abc', 'Template content did not match.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+	await t.test('prefix removing loader without slash', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			prefixLoader('a/b/one', (data) => {
+				try {
+					assert.equal(data, 'abc', 'Template content did not match.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+	
+
 	await t.test('tri template', async (t) => {
 		let pr = new Promise((resolve, reject) => {
 			templateLoader('one', (data) => {
+				try {
+					assert.equal(data, 'abc', 'Template content did not match.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+
+	await t.test('remember passing loader', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			rememberPassingLoader('one', (data) => {
+				try {
+					assert(data === undefined, 'No data should have been found.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+	rememberPassingLoader = createRememberPassingLoader(templateLoader)
+	await t.test('remember passing loader', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			rememberPassingLoader('one', (data) => {
+				try {
+					assert.equal(data, 'abc', 'Template content did not match.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+	
+
+	await t.test('tri template', async (t) => {
+		let pr = new Promise((resolve, reject) => {
+			templateLoader('/one', (data) => {
 				try {
 					assert.equal(data, 'abc', 'Template content did not match.')
 					resolve()
@@ -241,6 +443,22 @@ test("test file loader", async (t) => {
 		dataSource.msg = 'hi'
 		let pr = new Promise((resolve, reject) => {
 			memberLoader('msg', (data) => {
+				try {
+					assert.equal(data, 'hi', 'Member contents did not match.')
+					resolve()
+				}
+				catch (e) {
+					reject(e)
+				}
+			})
+		})
+		return pr
+	})
+
+	await t.test('member loader', async (t) => {
+		dataSource.msg = 'hi'
+		let pr = new Promise((resolve, reject) => {
+			memberLoader('/msg', (data) => {
 				try {
 					assert.equal(data, 'hi', 'Member contents did not match.')
 					resolve()

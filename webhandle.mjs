@@ -6,6 +6,9 @@ import createLongExpirationMiddleware from './lib/create-long-expiration-middlew
 import createResponseFilters from './lib/create-response-filters.mjs'
 import acceptLanguageMiddleware from './lib/accept-language-middleware.mjs'
 import path from "node:path"
+import createFileSinkLoader from './lib/loaders/create-file-loader.mjs'
+import createPrefixRemovingLoader from './lib/loaders/create-prefix-removing-loader.mjs'
+import createRememberPassingLoader from './lib/loaders/create-remember-passing-loader.mjs'
 
 /**
  * Webhandle root object.
@@ -25,6 +28,7 @@ export default class Webhandle {
 	 */
 	views;
 	templateLoaders;
+	staticLoaders;
 	staticPaths;
 	staticServers;
 	sinks;
@@ -51,6 +55,9 @@ export default class Webhandle {
 
 		/* functions which load templates */
 		this.setIfUnset('templateLoaders', [])
+
+		/* functions which load templates */
+		this.setIfUnset('staticLoaders', [])
 
 		/* a list of directories which contain static files to server */
 		this.setIfUnset('staticPaths', [])
@@ -170,7 +177,9 @@ export default class Webhandle {
 	}
 
 	/**
-	 * Serves static files from the path specified.
+	 * Serves static files from the path specified. In the base webhandle, all that happens is
+	 * that loader is created and added to `staticLoaders`. When extended by express, a static
+	 * server is created and added to a router.
 	 * @param {string} path 
 	 * @param {object} [options] Options
 	 * @param {string} [options.urlPrefix] Even though the folder structure at that location 
@@ -184,7 +193,7 @@ export default class Webhandle {
 		if(fixedSetOfFiles === undefined || fixedSetOfFiles === null) {
 			// If we're not in development mode and we're not told, then
 			// assume this is some dependency with a fixed set of files.
-			fixedSetOfFiles = this.development
+			fixedSetOfFiles = !this.development
 		}
 		
 		
@@ -193,8 +202,18 @@ export default class Webhandle {
 		let info = {urlPrefix, fixedSetOfFiles, path}
 		this.staticDirs.push(info)
 		
+		let loader = new createFileSinkLoader(new FileSink(path))
+		if(urlPrefix) {
+			loader = createPrefixRemovingLoader(loader, urlPrefix)
+		}
+		if(fixedSetOfFiles) {
+			loader = createRememberPassingLoader(loader)
+		}
+	
+		info.loader = loader
+		this.staticLoaders.push(loader)
+		
 		return info
-
 	}
 	
 	/**
