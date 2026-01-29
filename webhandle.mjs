@@ -27,7 +27,6 @@ export default class Webhandle {
 	 * @description An array of strings which are absolute paths to folders which contain views
 	 */
 	views;
-	templateLoaders;
 	staticLoaders;
 	staticPaths;
 	staticServers;
@@ -54,9 +53,6 @@ export default class Webhandle {
 		this.setIfUnset('views', [])
 
 		/* functions which load templates */
-		this.setIfUnset('templateLoaders', [])
-
-		/* functions which load templates */
 		this.setIfUnset('staticLoaders', [])
 
 		/* a list of directories which contain static files to server */
@@ -71,7 +67,7 @@ export default class Webhandle {
 		/* services created to access and process data */
 		this.setIfUnset('services', {})
 
-		/* modules by name which have added functionality */
+		/* components by name which have added functionality */
 		this.setIfUnset('componentManagers', {})
 
 		/* handlers for user requests */
@@ -177,6 +173,16 @@ export default class Webhandle {
 	}
 
 	/**
+	 * Adds a template directory. This is a no-op until extended by other code.
+	 * @param {string} path 
+	 * @param {object} options
+	 * @param {boolean} options.immutable True if contents of the directory won't changed. If unspecified,
+	 * assumed true in production and false in development.
+	 */
+	addTemplateDir(path, { immutable } = {}) {
+	}
+
+	/**
 	 * Serves static files from the path specified. In the base webhandle, all that happens is
 	 * that loader is created and added to `staticLoaders`. When extended by express, a static
 	 * server is created and added to a router.
@@ -186,7 +192,7 @@ export default class Webhandle {
 	 * doesn't have the prefix folders, any request for those resources must.
 	 * @param {string} [options.fixedSetOfFiles] If true, it will be assumed that the resources are at a
 	 * fixed, known set of URLs. That is, if a url can't be found the first time it's searched for
-	 * it would be found subsequent times either. This let's us optimize server files from libraries
+	 * it won't be found subsequent times either. This let's us optimize server files from libraries
 	 * or otherwise unchanging sets. This is assumed true if `development` is not true.
 	 */
 	addStaticDir(path,  {urlPrefix, fixedSetOfFiles} = {}) {
@@ -196,11 +202,10 @@ export default class Webhandle {
 			fixedSetOfFiles = !this.development
 		}
 		
-		
 		path = this.getAbsolutePathFromProjectRelative(path)
 
 		let info = {urlPrefix, fixedSetOfFiles, path}
-		this.staticDirs.push(info)
+		this.staticPaths.push(info)
 		
 		let loader = new createFileSinkLoader(new FileSink(path))
 		if(urlPrefix) {
