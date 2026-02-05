@@ -135,6 +135,7 @@ export default class Webhandle {
 					let data = await this.sinks.project.read(fileName)
 					if(data) {
 						this.config = Object.assign(this.config, JSON.parse(data))
+						this.configFileName = fileName
 					}
 				}
 				catch(e) {
@@ -271,6 +272,12 @@ export default class Webhandle {
 		// to fullfill a request as it currently exists.
 		composite.use(this.routers.preFullfill)
 
+		// Sometimes you have resources that look like static files, but are actually generated
+		// dynamically, or fetched from s3 before being cached locally, or built upon request
+		// or something where some of the time they really will be fullfille by sever the file
+		// but sometimes something else needs to happen first.
+		composite.use(this.routers.syntheticStatic)
+
 		// Set up a handler which will will call all the static severs
 		// This will use the static servers for each request, so later
 		// additions of static severs will always be called as well
@@ -354,6 +361,7 @@ export default class Webhandle {
 			, requestParse: this.createRouter()
 			, preStatic: this.createRouter()
 			, preFullfill: this.createRouter()
+			, syntheticStatic: this.createRouter()
 			, staticServers: this.createRouter()
 			, primary: this.createRouter()
 			, pageServer: this.createRouter()
