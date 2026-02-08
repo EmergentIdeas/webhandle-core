@@ -47,7 +47,7 @@ export default class Webhandle {
 		Object.assign(this, options)
 
 		this.setIfUnset('app', null)
-		
+
 		this.setIfUnset('config', {})
 
 		this.setIfUnset('views', [])
@@ -107,38 +107,38 @@ export default class Webhandle {
 		filog.defineProcessor('standard', {}, this.defaultLogStream, (entry) => {
 			return this.defaultLogFilter(entry)
 		})
-		
-		this.log = filog('webhandle', {component: 'root'})
+
+		this.log = filog('webhandle', { component: 'root' })
 
 		if (!this.sinks.project) {
 			this.sinks.project = new FileSink(this.projectRoot)
 		}
 
-		if(!this.config.development) {
+		if (!this.config.development) {
 			this.config.development = false
 		}
 		this.development = this.config.development
 
 	}
-	
+
 	/**
 	 * Add all the middleware and load the config data (if any)
 	 * @param {object} options 
 	 */
 	async init(options = {}) {
-		if(!this.initialized) {
+		if (!this.initialized) {
 
-			if(process.env.webhandleConfigFile || this.webhandleConfigFile || this.config.webhandleConfigFile || options.webhandleConfigFile) {
-				let fileName =  options.webhandleConfigFile || this.webhandleConfigFile || this.config.webhandleConfigFile || process.env.webhandleConfigFile
+			if (process.env.webhandleConfigFile || this.webhandleConfigFile || this.config.webhandleConfigFile || options.webhandleConfigFile) {
+				let fileName = options.webhandleConfigFile || this.webhandleConfigFile || this.config.webhandleConfigFile || process.env.webhandleConfigFile
 				try {
 
 					let data = await this.sinks.project.read(fileName)
-					if(data) {
+					if (data) {
 						this.config = Object.assign(this.config, JSON.parse(data))
 						this.configFileName = fileName
 					}
 				}
-				catch(e) {
+				catch (e) {
 					this.log.error({
 						msg: `Could not load config file ${fileName}`
 						, error: e
@@ -146,29 +146,29 @@ export default class Webhandle {
 				}
 			}
 
-			
-			if(!this.config.development) {
+
+			if (!this.config.development) {
 				this.config.development = false
 			}
-			if(process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase() === 'development') {
+			if (process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase() === 'development') {
 				this.config.development = true
 			}
-			
+
 			this.development = this.config.development
 
 			if (!this.compositeRouter) {
 				this.compositeRouter = this.createCompositeRouter()
 			}
-			
+
 			// add long expiration headers for any URL that starts with /vrsc/<some number>
 			this.routers.preParmParse.use(createLongExpirationMiddleware(this))
-			
+
 			// sets up the ability to add post processing to response rendering
 			this.routers.preParmParse.use(createResponseFilters(this))
 
 			// parse the Accept-Languages header to determine what languages the user desires
 			this.routers.preStatic.use(acceptLanguageMiddleware)
-			
+
 			this.initialized = true
 		}
 	}
@@ -196,32 +196,32 @@ export default class Webhandle {
 	 * it won't be found subsequent times either. This let's us optimize server files from libraries
 	 * or otherwise unchanging sets. This is assumed true if `development` is not true.
 	 */
-	addStaticDir(path,  {urlPrefix, fixedSetOfFiles} = {}) {
-		if(fixedSetOfFiles === undefined || fixedSetOfFiles === null) {
+	addStaticDir(path, { urlPrefix, fixedSetOfFiles } = {}) {
+		if (fixedSetOfFiles === undefined || fixedSetOfFiles === null) {
 			// If we're not in development mode and we're not told, then
 			// assume this is some dependency with a fixed set of files.
 			fixedSetOfFiles = !this.development
 		}
-		
+
 		path = this.getAbsolutePathFromProjectRelative(path)
 
-		let info = {urlPrefix, fixedSetOfFiles, path}
+		let info = { urlPrefix, fixedSetOfFiles, path }
 		this.staticPaths.push(info)
-		
+
 		let loader = new createFileSinkLoader(new FileSink(path))
-		if(urlPrefix) {
+		if (urlPrefix) {
 			loader = createPrefixRemovingLoader(loader, urlPrefix)
 		}
-		if(fixedSetOfFiles) {
+		if (fixedSetOfFiles) {
 			loader = createRememberPassingLoader(loader)
 		}
-	
+
 		info.loader = loader
 		this.staticLoaders.push(loader)
-		
+
 		return info
 	}
-	
+
 	/**
 	 * Renders data based on templates 
 	 * @param {string} templateName The name of the template to render
@@ -231,12 +231,12 @@ export default class Webhandle {
 	 * @returns A promise which resolves to the rendered template content if no destination wtream is specified
 	 */
 	async render(templateName, data, callback, destination) {
-		
-		
+
+
 	}
 
 	getAbsolutePathFromProjectRelative(projectRelative) {
-		if(projectRelative.startsWith('/')) {
+		if (projectRelative.startsWith('/')) {
 			return projectRelative
 		}
 		let resolvedRoot = path.resolve(this.projectRoot)
@@ -264,7 +264,7 @@ export default class Webhandle {
 		// access to that static content, modify the url based on language or location, or do
 		// some other task which needs to be done before the static file servers get a crack.
 		composite.use(this.routers.preStatic)
-		
+
 
 		// At this point we've investigated and changed anything which needs to be changed.
 		// This is a good place to do a specific type of logging because all parameters are
@@ -355,6 +355,33 @@ export default class Webhandle {
 		return createRouter()
 	}
 
+	/**
+	 * Takes a function. If this webhandle instance has a config file as a staring point,
+	 * this method loads the file, parses it to a js object, and passes it to the updater
+	 * function. It then awaits the result, which it then writes to the config file location. 
+	 * 
+	 * If no config file is setup, then this message never calls updater and doesn't do 
+	 * anything.
+	 * 
+	 * @param {function(object)} updater 
+	 */
+	async updateStoredConfiguration(updater) {
+		if (this.configFileName) {
+			try {
+				let content = await this.sinks.project.read(this.configFileName)
+				let conf = JSON.parse(content)
+				conf = await updater(conf)
+
+				await this.sinks.project.write(this.configFileName, JSON.stringify(conf, null, '\t'))
+			}
+			catch (e) {
+				log.error('Could not update the config file: ' + this.configFileName)
+				log.error(e)
+				throw new Error()
+			}
+		}
+	}
+
 	createRouters() {
 		let routers = {
 			preParmParse: this.createRouter()
@@ -370,8 +397,8 @@ export default class Webhandle {
 			, errorHandlers: this.createRouter()
 			, cleanup: this.createRouter()
 		}
-		
-		for(let key of Object.keys(routers)) {
+
+		for (let key of Object.keys(routers)) {
 			routers[key].routerName = key
 		}
 		
