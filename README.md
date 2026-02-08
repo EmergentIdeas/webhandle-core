@@ -11,6 +11,16 @@ listenOnHttpServer(webhandle)
 
 ## Features
 
+### Static Content
+
+It's easy to add static content from any directory.
+
+```js
+	addStaticDir(path, { urlPrefix, fixedSetOfFiles } = {}) 
+```
+The path can be absolute or relative to the project root.
+
+
 ### Routing
 Express routing is infinitely flexible. Most projects have an understandable, more
 constrained request lifecyle though. Webhandle plans that flexibility by adding a 

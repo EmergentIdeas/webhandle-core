@@ -278,10 +278,14 @@ export default class Webhandle {
 		// but sometimes something else needs to happen first.
 		composite.use(this.routers.syntheticStatic)
 
-		// Set up a handler which will will call all the static severs
+		// Set up a handler which will call all the static severs
 		// This will use the static servers for each request, so later
 		// additions of static severs will always be called as well
 		composite.use(this.routers.staticServers)
+
+		// Set up a handler which does prep work for any request which will be filled dynamically
+		// This is a good place to add modules as external resources. 
+		composite.use(this.routers.preDynamic)
 
 		// Add the primary router. This is for all the normal application code and for any
 		// code which would like to populate data for rendering onto a templated paged which
@@ -372,7 +376,14 @@ export default class Webhandle {
 				let conf = JSON.parse(content)
 				conf = await updater(conf)
 
-				await this.sinks.project.write(this.configFileName, JSON.stringify(conf, null, '\t'))
+				if(conf) {
+					// The conf shouldn't be done, but just in case somebody makes a mistake, let's
+					// not wipe out the existing config.
+					await this.sinks.project.write(this.configFileName, JSON.stringify(conf, null, '\t'))
+				}
+				else {
+					this.log.error("A caller tried to update the configuration but returned a null configuration.")
+				}
 			}
 			catch (e) {
 				log.error('Could not update the config file: ' + this.configFileName)
@@ -390,6 +401,7 @@ export default class Webhandle {
 			, preFullfill: this.createRouter()
 			, syntheticStatic: this.createRouter()
 			, staticServers: this.createRouter()
+			, preDynamic: this.createRouter()
 			, primary: this.createRouter()
 			, pageServer: this.createRouter()
 			, postPages: this.createRouter()
