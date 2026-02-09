@@ -41,6 +41,7 @@ export default class Webhandle {
 	defaultLogLevel;
 	defaultLogFilter;
 	defaultLogStream;
+	shutdownFunctions;
 
 
 	constructor(options) {
@@ -94,6 +95,12 @@ export default class Webhandle {
 		this.setIfUnset('deferredInitializers', [])
 
 
+		/*
+		 * Sometimes the environment is just terminated, but sometimes it would be nice
+		 * to have a controlled shutdown. Each of these should an async function which
+		 * takes the webhandle instance as a parameter.
+		 */
+		this.setIfUnset('shutdownFunctions', [])
 
 		// send all messages at info or above to std out (unless otherwise defined in the options)
 		this.setIfUnset('defaultLogLevel', filog.levels.INFO)
@@ -233,6 +240,10 @@ export default class Webhandle {
 	async render(templateName, data, callback, destination) {
 
 
+	}
+	
+	async shutdown() {
+		return Promise.all(this.shutdownFunctions.map(fun => fun(this)))
 	}
 
 	getAbsolutePathFromProjectRelative(projectRelative) {
