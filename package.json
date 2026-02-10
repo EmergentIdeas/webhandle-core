@@ -1,21 +1,26 @@
 {
-  "name": "@webhandle/core",
-  "version": "1.0.0",
-  "main": "webhandle.mjs",
-  "scripts": {
-    "test": "node test/all.mjs",
-    "testDebug": "node --inspect-brk test/all.mjs"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "type": "module",
-  "dependencies": {
-    "commingle": "^1.1.0",
-    "file-sink": "^1.0.15",
-    "filter-log": "^1.0.13",
-    "pausing-transform": "^1.0.1"
-  },
-  "imports": {}
+	"name": "@webhandle/core",
+	"version": "1.0.1",
+	"main": "webhandle.mjs",
+	"scripts": {
+		"test": "node test/all.mjs",
+		"testDebug": "node --inspect-brk test/all.mjs"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"type": "module",
+	"dependencies": {
+		"commingle": "^1.1.0",
+		"file-sink": "^1.0.15",
+		"filter-log": "^1.0.13",
+		"pausing-transform": "^1.0.1"
+	},
+	"imports": {},
+	"files": [
+		"README.md"
+		, "webhandle.mjs"
+		, "lib"
+	]
 }
