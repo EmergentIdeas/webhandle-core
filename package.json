@@ -1,6 +1,6 @@
 {
 	"name": "@webhandle/core",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"main": "webhandle.mjs",
 	"scripts": {
 		"test": "node test/all.mjs",
@@ -15,12 +15,12 @@
 		"commingle": "^1.1.0",
 		"file-sink": "^1.0.15",
 		"filter-log": "^1.0.13",
-		"pausing-transform": "^1.0.1"
+		"pausing-transform": "^1.0.2"
 	},
 	"imports": {},
 	"files": [
-		"README.md"
-		, "webhandle.mjs"
-		, "lib"
+		"README.md",
+		"webhandle.mjs",
+		"lib"
 	]
 }
