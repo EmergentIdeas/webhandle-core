@@ -33,7 +33,9 @@ The child routers, in the order they are called are:
 * requestParse: converts the raw http info into more usable objects on the request
 * preStatic: after the request is processed before static file resources are served
 * preFullfill: the last step before an attempt to fullfill the request is made. A good point for logging.
+* syntheticStatic: dynamically create what looks like dynamic content
 * staticServers: serves file content
+* preDynamic: a place to do prep work before dynamic content is created.
 * primary: router for normal request handling
 * pageServer: renders templates in the pages folder
 * postPages: last chance if no pages are matched
