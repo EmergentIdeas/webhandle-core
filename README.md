@@ -20,6 +20,22 @@ It's easy to add static content from any directory.
 ```
 The path can be absolute or relative to the project root.
 
+### Templates
+
+It's easy to templates from any directory.
+
+```js
+	addTemplateDir(path, { immutable } = {}) 
+```
+The path can be absolute or relative to the project root.
+
+Templates can also be added individually.
+
+```js
+webhandle.addTemplate(name, template)
+```
+
+
 
 ### Routing
 Express routing is infinitely flexible. Most projects have an understandable, more
