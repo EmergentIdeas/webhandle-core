@@ -11,6 +11,34 @@ listenOnHttpServer(webhandle)
 
 ## Features
 
+### Configuration
+
+There are many ways to configure the environment. Basically, there is one config object:
+`webhandle.config`. Any piece of code can read from it or add to it. It is initialized by:
+
+1. The member `options.webhandleConfigFile` passed to the `init` method. 
+2. The member `webhandleConfigFile` set on webhandle before init is called.
+3. The member `webhandle.config.webhandleConfigFile` set before init is called.
+4. The file at the environment variable `webhandleConfigFile`.
+
+An important config setting is the member `port`, which can determine which port the server
+starts on.
+
+Although you CAN set up your config however you like, what seems to make sense is that every
+component gets its own section like:
+
+```json
+{
+	"port": 3001,
+	"@webhandle/menu-set-editor": {
+		"publicFilesPrefix": "/@webhandle/menu-set-editor/files"
+		, "alwaysProvideResources": false
+	}
+}
+```
+
+
+
 ### Static Content
 
 It's easy to add static content from any directory.
