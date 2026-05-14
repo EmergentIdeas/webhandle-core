@@ -187,6 +187,11 @@ difference in these strategies. In the case where all requested resources are ca
 can finish in the same tick. Since loaders may be called hundreds or thousands of times per request, the
 extra ticks add up.
 
+Loaders may also have two optional, additional methods to improve performance: `getStatus` and `getValue`.
+`getStatus` returns `true` if the loader knows it contains a resource for a key, `false` if it knows it doesn't,
+and `undefined` if it doesn't know. `getValue` returns the resource, if it is available synchronously, otherwise
+it returns `undefined` and the resource should be fetched via the callback process.
+
 
 
 ### Languages
