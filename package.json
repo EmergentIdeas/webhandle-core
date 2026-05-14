@@ -1,6 +1,6 @@
 {
 	"name": "@webhandle/core",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"main": "webhandle.mjs",
 	"scripts": {
 		"test": "node test/all.mjs",

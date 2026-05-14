@@ -351,6 +351,14 @@ test("test file loader", async (t) => {
 		assert.equal(compositeLoader.getValue('b'), undefined, 'Value should be undefined.')
 		assert.equal(dValue, 4, 'Value should be 4.')
 		
+		let eValueCallback
+		compositeLoader = createCompositeLoader()
+		compositeLoader('e', (val) => {
+			eValueCallback = true
+		})
+		assert.equal(eValueCallback, true, 'Callback should have set true')
+
+		
 	})
 
 	await t.test('tri template', async (t) => {
