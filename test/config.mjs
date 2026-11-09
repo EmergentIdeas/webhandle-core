@@ -1,14 +1,32 @@
 import test from 'node:test';
 import assert from 'node:assert'
+import os from 'node:os';
+import path from "node:path"
 
 import Webhandle from '../webhandle.mjs';
-
 import FileSink from 'file-sink'
 
-let tmp = new FileSink('/tmp')
+let tempDir = os.tmpdir();
+let tmp = new FileSink(tempDir)
 
 
 test("config tests", async (t) => {
+
+	await t.test('test absolute path', async (t) => {
+		let wh = new Webhandle({
+			projectRoot: tempDir
+		})
+		await wh.init()
+		
+		let p = wh.getAbsolutePathFromProjectRelative(tempDir)
+		
+		assert(p === tempDir, `Path should be ${tempDir}`)
+
+		p = wh.getAbsolutePathFromProjectRelative('tmp')
+		
+		let predicted = `${tempDir}${path.sep}tmp`
+		assert(p === predicted, `Path should be ${predicted}`)
+	})
 
 	await t.test('no specification', async (t) => {
 		let wh = new Webhandle()

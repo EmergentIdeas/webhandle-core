@@ -1,6 +1,6 @@
 {
 	"name": "@webhandle/core",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"main": "webhandle.mjs",
 	"scripts": {
 		"test": "node test/all.mjs",
@@ -13,7 +13,7 @@
 	"type": "module",
 	"dependencies": {
 		"commingle": "^1.1.0",
-		"file-sink": "^1.0.15",
+		"file-sink": "^1.0.16",
 		"filter-log": "^1.0.13",
 		"pausing-transform": "^1.0.2"
 	},

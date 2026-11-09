@@ -247,10 +247,18 @@ export default class Webhandle {
 	}
 
 	getAbsolutePathFromProjectRelative(projectRelative) {
-		if (projectRelative.startsWith('/')) {
-			return projectRelative
-		}
 		let resolvedRoot = path.resolve(this.projectRoot)
+		if(path.isAbsolute(projectRelative)) {
+			let resolved = path.resolve(projectRelative)
+			if(resolved.startsWith(resolvedRoot)) {
+				projectRelative = resolved.substring(resolvedRoot.length + 1)
+			}
+			else {
+				// Looks like the path is outside of project directory
+				throw new Error("Passed path is outside the project.")
+			}
+
+		}
 		let absPath = path.join(resolvedRoot, projectRelative)
 		return absPath
 	}
